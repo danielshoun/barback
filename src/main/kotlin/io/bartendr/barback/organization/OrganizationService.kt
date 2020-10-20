@@ -1,11 +1,10 @@
 package io.bartendr.barback.organization
 
-import io.bartendr.barback.event.Event
 import io.bartendr.barback.event.EventCategory
 import io.bartendr.barback.event.EventCategoryRepository
-import io.bartendr.barback.organization.form.AddCategoryForm
-import io.bartendr.barback.organization.form.AddOrganizationForm
-import io.bartendr.barback.organization.form.JoinOrganizationForm
+import io.bartendr.barback.organization.form.*
+import io.bartendr.barback.role.Role
+import io.bartendr.barback.role.RoleRepository
 import io.bartendr.barback.school.SchoolRepository
 import io.bartendr.barback.user.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -170,17 +169,17 @@ class OrganizationService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN")) {
+        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
         val unapprovedUser = userRepository.findByIdOrNull(userId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val unapprovedUserRole = roleRepository.findByOrganizationAndUsersContaining(organization, unapprovedUser)?:
+        val unapprovedUserRole = roleRepository.findByOrganizationAndUsers(organization, unapprovedUser)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (!unapprovedUserRole.permissions.contains("UNAPPROVED")) {
@@ -228,7 +227,7 @@ class OrganizationService {
         val unapprovedUsers: MutableList<User> = mutableListOf()
 
         for (user in users) {
-            val role = roleRepository.findByOrganizationAndUsersContaining(organization, user)?:
+            val role = roleRepository.findByOrganizationAndUsers(organization, user)?:
                     continue
             if (role.permissions.contains("UNAPPROVED")) {
                 unapprovedUsers.add(user)
@@ -247,10 +246,10 @@ class OrganizationService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN")) {
+        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -274,7 +273,7 @@ class OrganizationService {
         var barDetailsToRemove = mutableListOf<BarDetails>()
 
         for (barDetails in barDetailsList) {
-            if (roleRepository.findByOrganizationAndUsersContaining(organization, barDetails.user)!!.permissions.contains("UNAPPROVED")) {
+            if (roleRepository.findByOrganizationAndUsers(organization, barDetails.user)!!.permissions.contains("UNAPPROVED")) {
                         barDetailsToRemove.add(barDetails)
                     }
         }
@@ -282,39 +281,6 @@ class OrganizationService {
         barDetailsList.removeAll(barDetailsToRemove)
 
         return ResponseEntity(barDetailsList, HttpStatus.OK)
-    }
-
-    fun getOrgRoles(organizationId: Long, session: String): ResponseEntity<MutableList<Role>> {
-        val requester = userRepository.findBySessions_Key(session)?:
-                return ResponseEntity(HttpStatus.UNAUTHORIZED)
-
-        val organization = organizationRepository.findByIdOrNull(organizationId)?:
-                return ResponseEntity(HttpStatus.BAD_REQUEST)
-
-        if (!requester.organizations.contains(organization)) {
-            return ResponseEntity(HttpStatus.UNAUTHORIZED)
-        }
-
-        val roles = roleRepository.findAllByOrganization(organization).toMutableList()
-
-        val unapprovedRole = roleRepository.findByOrganizationAndPermissions(organization, "UNAPPROVED")
-
-        roles.remove(unapprovedRole)
-
-        return ResponseEntity(roles, HttpStatus.OK)
-    }
-
-    fun getRoleForOrg(organizationId: Long, session: String): ResponseEntity<Role> {
-        val requester = userRepository.findBySessions_Key(session)?:
-                return ResponseEntity(HttpStatus.UNAUTHORIZED)
-
-        val organization = organizationRepository.findByIdOrNull(organizationId)?:
-                return ResponseEntity(HttpStatus.BAD_REQUEST)
-
-        val role = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
-                return ResponseEntity(HttpStatus.BAD_REQUEST)
-
-        return ResponseEntity(role, HttpStatus.OK)
     }
 
     fun getEventCategories(organizationId: Long, session: String): ResponseEntity<List<EventCategory>> {
@@ -340,7 +306,7 @@ class OrganizationService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val role = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val role = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         return if (role.permissions.contains("SUPERADMIN") || role.permissions.contains("canAddEventCategories")) {

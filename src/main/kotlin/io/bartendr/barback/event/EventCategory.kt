@@ -2,7 +2,7 @@ package io.bartendr.barback.event
 
 import io.bartendr.barback.model.BaseEntity
 import io.bartendr.barback.organization.Organization
-import io.bartendr.barback.user.Role
+import io.bartendr.barback.role.Role
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import javax.persistence.ManyToMany

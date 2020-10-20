@@ -1,11 +1,9 @@
 package io.bartendr.barback.organization
 
 import io.bartendr.barback.event.EventCategory
-import io.bartendr.barback.organization.form.AddCategoryForm
-import io.bartendr.barback.organization.form.AddOrganizationForm
-import io.bartendr.barback.organization.form.JoinOrganizationForm
+import io.bartendr.barback.organization.form.*
 import io.bartendr.barback.user.BarDetails
-import io.bartendr.barback.user.Role
+import io.bartendr.barback.role.Role
 import io.bartendr.barback.user.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -58,18 +56,6 @@ class OrganizationController {
     fun getOrgBarDetails(@PathVariable(name = "organizationId") organizationId: Long,
                         @CookieValue(value = "session") session: String): ResponseEntity<List<BarDetails>> {
         return organizationService.getOrgBarDetails(organizationId, session)
-    }
-
-    @GetMapping("/api/v1/organization/{organizationId}/roles")
-    fun getOrgRoles(@PathVariable(name = "organizationId") organizationId: Long,
-                    @CookieValue(value = "session") session: String): ResponseEntity<MutableList<Role>> {
-        return organizationService.getOrgRoles(organizationId, session)
-    }
-
-    @GetMapping("/api/v1/organization/{organizationId}/role-self")
-    fun getRoleForOrg(@PathVariable(name = "organizationId") organizationId: Long,
-                      @CookieValue(value = "session") session: String): ResponseEntity<Role> {
-        return organizationService.getRoleForOrg(organizationId, session)
     }
 
     @GetMapping("/api/v1/organization/{organizationId}/categories")

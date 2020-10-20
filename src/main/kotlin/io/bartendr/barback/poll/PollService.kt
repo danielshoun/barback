@@ -2,7 +2,7 @@ package io.bartendr.barback.poll
 
 import io.bartendr.barback.organization.OrganizationRepository
 import io.bartendr.barback.poll.form.CreatePollForm
-import io.bartendr.barback.user.RoleRepository
+import io.bartendr.barback.role.RoleRepository
 import io.bartendr.barback.user.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -36,7 +36,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManagePolls")) {
@@ -69,7 +69,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
@@ -110,7 +110,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
@@ -131,7 +131,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
@@ -152,7 +152,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
@@ -167,14 +167,14 @@ class PollService {
         return ResponseEntity(choices, HttpStatus.OK)
     }
 
-    fun getPollWinner(organizationId: Long, pollId: Long, session: String) : ResponseEntity<MutableList<PollChoice>> {
+    fun getPollResults(organizationId: Long, pollId: Long, session: String) : ResponseEntity<MutableList<ChoiceResult>> {
         val requester = userRepository.findBySessions_Key(session)?:
         return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
@@ -186,18 +186,15 @@ class PollService {
 
         val choices = pollChoiceRepository.findAllByPoll(poll)
 
-        var winners: MutableList<PollChoice> = mutableListOf(choices[0])
+        val results: MutableList<ChoiceResult> = mutableListOf()
 
         for(choice in choices) {
-            if (choice.hashes.size > winners[0].hashes.size) {
-                winners = mutableListOf(choice)
-            }
-            else if (choice.hashes.size == winners[0].hashes.size && choices.indexOf(choice) != 0) {
-                winners.add(choice)
-            }
+            results.add(ChoiceResult(choice.poll, choice.text, choice.hashes.size))
         }
 
-        return ResponseEntity(winners, HttpStatus.OK)
+        results.sortByDescending {it.total}
+
+        return ResponseEntity(results, HttpStatus.OK)
     }
 
     fun checkVote(organizationId: Long, pollId: Long, voteHash: String, session: String) : ResponseEntity<PollChoice> {
@@ -207,7 +204,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:

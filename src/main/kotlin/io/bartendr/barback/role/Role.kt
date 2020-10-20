@@ -1,11 +1,9 @@
-package io.bartendr.barback.user
+package io.bartendr.barback.role
 
-import com.fasterxml.jackson.annotation.JsonBackReference
-import com.fasterxml.jackson.annotation.JsonIdentityInfo
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.bartendr.barback.model.BaseEntity
 import io.bartendr.barback.organization.Organization
-import java.security.Permissions
+import io.bartendr.barback.user.User
 import javax.persistence.ElementCollection
 import javax.persistence.Entity
 import javax.persistence.ManyToMany
@@ -16,9 +14,11 @@ Possible permissions:
 SUPERADMIN
 UNAPPROVED
 DEFAULT
+canEditOrganization
+canManageUsers
+canManageRoles
 canSubmitEvents
 canApproveEvents
-canEditOrganization
 canAddEventCategories
 canManagePolls
  */
