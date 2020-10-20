@@ -167,7 +167,7 @@ class PollService {
         return ResponseEntity(choices, HttpStatus.OK)
     }
 
-    fun getPollWinner(organizationId: Long, pollId: Long, session: String) : ResponseEntity<MutableList<PollChoice>> {
+    fun getPollResults(organizationId: Long, pollId: Long, session: String) : ResponseEntity<MutableList<ChoiceResult>> {
         val requester = userRepository.findBySessions_Key(session)?:
         return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -186,18 +186,15 @@ class PollService {
 
         val choices = pollChoiceRepository.findAllByPoll(poll)
 
-        var winners: MutableList<PollChoice> = mutableListOf(choices[0])
+        val results: MutableList<ChoiceResult> = mutableListOf()
 
         for(choice in choices) {
-            if (choice.hashes.size > winners[0].hashes.size) {
-                winners = mutableListOf(choice)
-            }
-            else if (choice.hashes.size == winners[0].hashes.size && choices.indexOf(choice) != 0) {
-                winners.add(choice)
-            }
+            results.add(ChoiceResult(choice.poll, choice.text, choice.hashes.size))
         }
 
-        return ResponseEntity(winners, HttpStatus.OK)
+        results.sortByDescending {it.total}
+
+        return ResponseEntity(results, HttpStatus.OK)
     }
 
     fun checkVote(organizationId: Long, pollId: Long, voteHash: String, session: String) : ResponseEntity<PollChoice> {

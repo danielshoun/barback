@@ -45,11 +45,11 @@ class PollController {
         return pollService.getPollChoices(organizationId, pollId, session)
     }
 
-    @GetMapping("/api/v1/organization/{organizationId}/poll/{pollId}/winner")
-    fun getPollWinner(@PathVariable(name = "organizationId") organizationId: Long,
+    @GetMapping("/api/v1/organization/{organizationId}/poll/{pollId}/results")
+    fun getPollResults(@PathVariable(name = "organizationId") organizationId: Long,
                       @PathVariable(name = "pollId") pollId: Long,
-                      @CookieValue(name = "session") session: String) : ResponseEntity<MutableList<PollChoice>> {
-        return pollService.getPollWinner(organizationId, pollId, session)
+                      @CookieValue(name = "session") session: String) : ResponseEntity<MutableList<ChoiceResult>> {
+        return pollService.getPollResults(organizationId, pollId, session)
     }
 
     @GetMapping("/api/v1/organization/{organizationId}/poll/{pollId}/check")
