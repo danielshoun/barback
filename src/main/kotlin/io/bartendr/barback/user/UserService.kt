@@ -64,7 +64,8 @@ class UserService {
         emailServiceImpl.sendSimpleMessage(
                 to = newUser.emailAddress,
                 subj = "Bartendr: Email Verification",
-                text = "Please click the link below to verify your email address.\n\nhttp://localhost:3000/app/verify/" + newUser.emailVerificationToken
+                text = "<html><body>Please click <a href=\"https://bartendr.io/app/verify/"
+                        + newUser.emailVerificationToken + "\">here</a> to verify your email address.</body></html>"
         )
 
         return ResponseEntity(HttpStatus.CREATED)
