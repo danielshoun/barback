@@ -36,7 +36,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManagePolls")) {
@@ -69,7 +69,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
@@ -110,7 +110,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
@@ -131,7 +131,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
@@ -152,7 +152,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
@@ -174,7 +174,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
@@ -207,7 +207,7 @@ class PollService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        val requesterRole = roleRepository.findByOrganizationAndUsersContaining(organization, requester)?:
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
         return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:

@@ -1,9 +1,7 @@
 package io.bartendr.barback.organization
 
 import io.bartendr.barback.event.EventCategory
-import io.bartendr.barback.organization.form.AddCategoryForm
-import io.bartendr.barback.organization.form.AddOrganizationForm
-import io.bartendr.barback.organization.form.JoinOrganizationForm
+import io.bartendr.barback.organization.form.*
 import io.bartendr.barback.user.BarDetails
 import io.bartendr.barback.user.Role
 import io.bartendr.barback.user.User
@@ -83,6 +81,21 @@ class OrganizationController {
                          @RequestBody addCategoryForm: AddCategoryForm,
                          @CookieValue(value = "session") session: String): ResponseEntity<String> {
         return organizationService.addEventCategory(organizationId, addCategoryForm, session)
+    }
+
+    @PostMapping("/api/v1/organization/{organizationId}/roles/add")
+    fun addRole(@PathVariable(name = "organizationId") organizationId: Long,
+                @RequestBody addRoleForm: AddRoleForm,
+                @CookieValue(value = "session") session: String): ResponseEntity<String> {
+        return organizationService.addRole(organizationId, addRoleForm, session)
+    }
+
+    @PostMapping("/api/v1/organization/{organizationId}/roles/{roleId}/give")
+    fun giveUsersRole(@PathVariable(name = "organizationId") organizationId: Long,
+                      @PathVariable(name = "roleId") roleId: Long,
+                      @RequestBody giveRoleForm: GiveRoleForm,
+                      @CookieValue(value = "session") session: String): ResponseEntity<String> {
+        return organizationService.giveUsersRole(organizationId, roleId, giveRoleForm, session)
     }
 
 }

@@ -16,9 +16,11 @@ Possible permissions:
 SUPERADMIN
 UNAPPROVED
 DEFAULT
+canEditOrganization
+canManageUsers
+canManageRoles
 canSubmitEvents
 canApproveEvents
-canEditOrganization
 canAddEventCategories
 canManagePolls
  */
