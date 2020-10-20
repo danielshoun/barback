@@ -2,7 +2,7 @@ package io.bartendr.barback.poll
 
 import io.bartendr.barback.organization.OrganizationRepository
 import io.bartendr.barback.poll.form.CreatePollForm
-import io.bartendr.barback.user.RoleRepository
+import io.bartendr.barback.role.RoleRepository
 import io.bartendr.barback.user.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull

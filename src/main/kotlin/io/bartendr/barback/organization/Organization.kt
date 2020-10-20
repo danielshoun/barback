@@ -1,11 +1,8 @@
 package io.bartendr.barback.organization
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import io.bartendr.barback.event.EventCategory
 import io.bartendr.barback.model.BaseEntity
 import io.bartendr.barback.school.School
-import io.bartendr.barback.user.Role
-import io.bartendr.barback.user.User
 import javax.persistence.*
 
 @Entity

@@ -3,7 +3,7 @@ package io.bartendr.barback.organization
 import io.bartendr.barback.event.EventCategory
 import io.bartendr.barback.organization.form.*
 import io.bartendr.barback.user.BarDetails
-import io.bartendr.barback.user.Role
+import io.bartendr.barback.role.Role
 import io.bartendr.barback.user.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -58,18 +58,6 @@ class OrganizationController {
         return organizationService.getOrgBarDetails(organizationId, session)
     }
 
-    @GetMapping("/api/v1/organization/{organizationId}/roles")
-    fun getOrgRoles(@PathVariable(name = "organizationId") organizationId: Long,
-                    @CookieValue(value = "session") session: String): ResponseEntity<MutableList<Role>> {
-        return organizationService.getOrgRoles(organizationId, session)
-    }
-
-    @GetMapping("/api/v1/organization/{organizationId}/role-self")
-    fun getRoleForOrg(@PathVariable(name = "organizationId") organizationId: Long,
-                      @CookieValue(value = "session") session: String): ResponseEntity<Role> {
-        return organizationService.getRoleForOrg(organizationId, session)
-    }
-
     @GetMapping("/api/v1/organization/{organizationId}/categories")
     fun getEventCategories(@PathVariable(name = "organizationId") organizationId: Long,
                            @CookieValue(value = "session") session: String): ResponseEntity<List<EventCategory>> {
@@ -81,21 +69,6 @@ class OrganizationController {
                          @RequestBody addCategoryForm: AddCategoryForm,
                          @CookieValue(value = "session") session: String): ResponseEntity<String> {
         return organizationService.addEventCategory(organizationId, addCategoryForm, session)
-    }
-
-    @PostMapping("/api/v1/organization/{organizationId}/roles/add")
-    fun addRole(@PathVariable(name = "organizationId") organizationId: Long,
-                @RequestBody addRoleForm: AddRoleForm,
-                @CookieValue(value = "session") session: String): ResponseEntity<String> {
-        return organizationService.addRole(organizationId, addRoleForm, session)
-    }
-
-    @PostMapping("/api/v1/organization/{organizationId}/roles/{roleId}/give")
-    fun giveUsersRole(@PathVariable(name = "organizationId") organizationId: Long,
-                      @PathVariable(name = "roleId") roleId: Long,
-                      @RequestBody giveRoleForm: GiveRoleForm,
-                      @CookieValue(value = "session") session: String): ResponseEntity<String> {
-        return organizationService.giveUsersRole(organizationId, roleId, giveRoleForm, session)
     }
 
 }
