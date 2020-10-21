@@ -13,4 +13,4 @@ class BarDetails(
         @ManyToOne var organization: Organization,
         var score: Int = 0,
         @OneToMany(cascade = [CascadeType.ALL]) var flags: MutableList<Flag> = mutableListOf()
-): BaseEntity<Long>()
+) : BaseEntity<Long>()

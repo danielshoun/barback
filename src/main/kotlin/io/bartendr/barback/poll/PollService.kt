@@ -29,15 +29,19 @@ class PollService {
     @Autowired
     lateinit var pollChoiceRepository: PollChoiceRepository
 
-    fun createPoll(organizationId: Long, createPollForm: CreatePollForm, session: String) : ResponseEntity<String> {
+    fun createPoll(
+            organizationId: Long,
+            createPollForm: CreatePollForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManagePolls")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
@@ -62,21 +66,26 @@ class PollService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun submitPoll(organizationId: Long, pollId: Long, choiceId: Long, session: String) : ResponseEntity<String> {
+    fun submitPoll(
+            organizationId: Long,
+            pollId: Long,
+            choiceId: Long,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val choice = pollChoiceRepository.findByIdOrNull(choiceId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
@@ -103,15 +112,18 @@ class PollService {
         return ResponseEntity(voteHash, HttpStatus.OK)
     }
 
-    fun getCurrentPolls(organizationId: Long, session: String) : ResponseEntity<List<Poll>> {
+    fun getCurrentPolls(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<Poll>> {
         val requester = userRepository.findBySessions_Key(session)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
@@ -124,15 +136,18 @@ class PollService {
         return ResponseEntity(currentPolls, HttpStatus.OK)
     }
 
-    fun getPastPolls(organizationId: Long, session: String) : ResponseEntity<List<Poll>> {
+    fun getPastPolls(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<Poll>> {
         val requester = userRepository.findBySessions_Key(session)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
@@ -145,18 +160,22 @@ class PollService {
         return ResponseEntity(pastPolls, HttpStatus.OK)
     }
 
-    fun getPollChoices(organizationId: Long, pollId: Long, session: String) : ResponseEntity<List<PollChoice>> {
+    fun getPollChoices(
+            organizationId: Long,
+            pollId: Long,
+            session: String
+    ): ResponseEntity<List<PollChoice>> {
         val requester = userRepository.findBySessions_Key(session)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
@@ -167,18 +186,22 @@ class PollService {
         return ResponseEntity(choices, HttpStatus.OK)
     }
 
-    fun getPollResults(organizationId: Long, pollId: Long, session: String) : ResponseEntity<MutableList<ChoiceResult>> {
+    fun getPollResults(
+            organizationId: Long,
+            pollId: Long,
+            session: String
+    ): ResponseEntity<MutableList<ChoiceResult>> {
         val requester = userRepository.findBySessions_Key(session)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
@@ -197,18 +220,23 @@ class PollService {
         return ResponseEntity(results, HttpStatus.OK)
     }
 
-    fun checkVote(organizationId: Long, pollId: Long, voteHash: String, session: String) : ResponseEntity<PollChoice> {
+    fun checkVote(
+            organizationId: Long,
+            pollId: Long,
+            voteHash: String,
+            session: String
+    ): ResponseEntity<PollChoice> {
         val requester = userRepository.findBySessions_Key(session)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val poll = pollRepository.findByIdOrNull(pollId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         if (requesterRole.permissions.contains("UNAPPROVED")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)

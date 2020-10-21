@@ -37,7 +37,10 @@ class OrganizationService {
 
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
 
-    fun addOrganization(addOrganizationForm: AddOrganizationForm, session: String): ResponseEntity<String> {
+    fun addOrganization(
+            addOrganizationForm: AddOrganizationForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -111,7 +114,10 @@ class OrganizationService {
 
     }
 
-    fun joinOrganization(joinOrganizationForm: JoinOrganizationForm, session: String): ResponseEntity<String> {
+    fun joinOrganization(
+            joinOrganizationForm: JoinOrganizationForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -164,7 +170,11 @@ class OrganizationService {
         }
     }
 
-    fun approveUser(organizationId: Long, userId: Long, session: String): ResponseEntity<String> {
+    fun approveUser(
+            organizationId: Long,
+            userId: Long,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -200,7 +210,10 @@ class OrganizationService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun getOrganization(organizationId: Long, session: String): ResponseEntity<Organization> {
+    fun getOrganization(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<Organization> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -214,7 +227,10 @@ class OrganizationService {
         return ResponseEntity(organization, HttpStatus.OK)
     }
 
-    fun getOrgUsers(organizationId: Long, session: String): ResponseEntity<MutableList<User>> {
+    fun getOrgUsers(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<MutableList<User>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -241,7 +257,10 @@ class OrganizationService {
         return ResponseEntity(users, HttpStatus.OK)
     }
 
-    fun getUnapprovedUsers(organizationId: Long, session: String): ResponseEntity<MutableList<User>> {
+    fun getUnapprovedUsers(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<MutableList<User>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -260,7 +279,10 @@ class OrganizationService {
         return ResponseEntity(unapprovedRole.users, HttpStatus.OK)
     }
     
-    fun getOrgBarDetails(organizationId: Long, session: String): ResponseEntity<List<BarDetails>> {
+    fun getOrgBarDetails(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<BarDetails>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -285,7 +307,10 @@ class OrganizationService {
         return ResponseEntity(barDetailsList, HttpStatus.OK)
     }
 
-    fun getEventCategories(organizationId: Long, session: String): ResponseEntity<List<EventCategory>> {
+    fun getEventCategories(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<EventCategory>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -301,7 +326,11 @@ class OrganizationService {
         return ResponseEntity(eventCategories, HttpStatus.OK)
     }
 
-    fun addEventCategory(organizationId: Long, addCategoryForm: AddCategoryForm, session: String): ResponseEntity<String> {
+    fun addEventCategory(
+            organizationId: Long,
+            addCategoryForm: AddCategoryForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 

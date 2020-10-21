@@ -21,4 +21,13 @@ class EventController {
         return eventService.addEvent(organizationId, addEventForm, session)
     }
 
+    @PostMapping("/api/v1/organization/{organizationId}/events/{eventId}/approve")
+    fun approveEvent(
+            @PathVariable(name = "organizationId") organizationId: Long,
+            @PathVariable(name = "eventId") eventId: Long,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<String> {
+        return eventService.approveEvent(organizationId, eventId, session)
+    }
+
 }

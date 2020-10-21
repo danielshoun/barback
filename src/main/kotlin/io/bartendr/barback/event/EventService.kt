@@ -34,15 +34,19 @@ class EventService {
     lateinit var eventCategoryRepository: EventCategoryRepository
 
 
-    fun addEvent(organizationId: Long, addEventForm: AddEventForm, session: String): ResponseEntity<String> {
+    fun addEvent(
+            organizationId: Long,
+            addEventForm: AddEventForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canSubmitEvents") && !requesterRole.permissions.contains("canManageEvents")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
@@ -61,7 +65,7 @@ class EventService {
         }
 
         val category = eventCategoryRepository.findByIdOrNull(addEventForm.categoryId)?:
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         val newEvent = Event(
                 name = addEventForm.name,
@@ -85,6 +89,7 @@ class EventService {
                 for (user in requiredRole.users) {
                     var barDetails = barDetailsRepository.findByUserAndOrganization(user, newEvent.organization)
                     barDetails.score -= newEvent.category.penalty
+                    barDetailsRepository.save(barDetails)
 
                 }
             }
@@ -92,6 +97,32 @@ class EventService {
 
         eventRepository.save(newEvent)
 
+        return ResponseEntity(HttpStatus.OK)
+    }
+
+    fun approveEvent(
+            organizationId: Long,
+            eventId: Long,
+            session: String
+    ): ResponseEntity<String> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val event = eventRepository.findByIdOrNull(eventId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageEvents")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        event.approvedBy = requester
+        eventRepository.save(event)
         return ResponseEntity(HttpStatus.OK)
     }
 

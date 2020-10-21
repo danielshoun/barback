@@ -23,7 +23,10 @@ class SchoolService {
     @Autowired
     lateinit var organizationRepository: OrganizationRepository
 
-    fun addSchool(addSchoolForm: AddSchoolForm, session: String): ResponseEntity<String> {
+    fun addSchool(
+            addSchoolForm: AddSchoolForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -46,7 +49,10 @@ class SchoolService {
         return ResponseEntity(HttpStatus.CREATED)
     }
 
-    fun editSchool(editSchoolForm: EditSchoolForm, session: String): ResponseEntity<String> {
+    fun editSchool(
+            editSchoolForm: EditSchoolForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -75,7 +81,10 @@ class SchoolService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun deleteSchool(schoolId: Long, session: String): ResponseEntity<String> {
+    fun deleteSchool(
+            schoolId: Long,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -95,7 +104,10 @@ class SchoolService {
         return ResponseEntity(HttpStatus.ACCEPTED)
     }
 
-    fun joinSchool(ref: String, session: String): ResponseEntity<String> {
+    fun joinSchool(
+            ref: String,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -112,7 +124,9 @@ class SchoolService {
 
     }
 
-    fun getAllSchools(session: String): ResponseEntity<List<School>> {
+    fun getAllSchools(
+            session: String
+    ): ResponseEntity<List<School>> {
         val requester = userRepository.findBySessions_Key(session)?:
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -124,7 +138,10 @@ class SchoolService {
         return ResponseEntity(schools, HttpStatus.OK)
     }
 
-    fun getOrgsBySchool(schoolId: Long, session: String): ResponseEntity<List<Organization>> {
+    fun getOrgsBySchool(
+            schoolId: Long,
+            session: String
+    ): ResponseEntity<List<Organization>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 

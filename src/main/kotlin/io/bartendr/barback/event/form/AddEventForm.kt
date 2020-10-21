@@ -2,7 +2,7 @@ package io.bartendr.barback.event.form
 
 import java.util.*
 
-class AddEventForm (
+class AddEventForm(
         val name: String,
         val value: Int,
         val startTime: Date,
