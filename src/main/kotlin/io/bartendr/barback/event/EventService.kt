@@ -149,7 +149,7 @@ class EventService {
         val event = eventRepository.findByIdOrNull(eventId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if(event.closeTime.before(Date()) && event.startTime.after(Date())) {
+        if(event.closeTime.before(Date()) || event.startTime.after(Date())) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 

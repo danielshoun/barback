@@ -22,7 +22,6 @@ class Event(
         @ManyToOne var category: EventCategory,
         @ManyToMany(targetEntity = User::class) var attended: MutableList<User> = mutableListOf(),
         @ManyToMany(targetEntity = User::class) var notAttended: MutableList<User> = mutableListOf(),
-        var isOpen: Boolean = false,
         var isClosed: Boolean = false
 ) : BaseEntity<Long>() {
 
