@@ -3,7 +3,6 @@ package io.bartendr.barback.organization
 import io.bartendr.barback.event.EventCategory
 import io.bartendr.barback.organization.form.*
 import io.bartendr.barback.user.BarDetails
-import io.bartendr.barback.role.Role
 import io.bartendr.barback.user.User
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity

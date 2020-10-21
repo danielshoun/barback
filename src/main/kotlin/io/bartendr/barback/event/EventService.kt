@@ -88,7 +88,7 @@ class EventService {
 
             for(requiredRole in newEvent.category.requiredFor) {
                 for(user in requiredRole.users) {
-                    var barDetails = barDetailsRepository.findByUserAndOrganization(user, newEvent.organization)
+                    val barDetails = barDetailsRepository.findByUserAndOrganization(user, newEvent.organization)
                     barDetails.score -= newEvent.category.penalty
                     barDetailsRepository.save(barDetails)
 
@@ -163,7 +163,7 @@ class EventService {
 
         event.attended.add(requester)
 
-        var barDetails = barDetailsRepository.findByUserAndOrganization(requester, organization)
+        val barDetails = barDetailsRepository.findByUserAndOrganization(requester, organization)
         barDetails.score += event.value
         if(event.category.requiredFor.size == 0) {
             for(flag in barDetails.flags) {
@@ -213,7 +213,7 @@ class EventService {
         newNotAttended.removeAll(event.notAttended)
 
         for(user in newAttended) {
-            var barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
+            val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
             barDetails.score += event.value
             for(flag in barDetails.flags) {
                 if(flag.category == event.category) {
@@ -224,7 +224,7 @@ class EventService {
         }
 
         for(user in newNotAttended) {
-            var barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
+            val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
             barDetails.score -= event.value
             for(flag in barDetails.flags) {
                 if(flag.category == event.category) {

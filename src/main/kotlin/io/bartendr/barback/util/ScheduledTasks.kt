@@ -27,17 +27,17 @@ class ScheduledTasks {
 
     @Scheduled(fixedRate = 60000)
     fun closeEvents() {
-        var eventsToClose = eventRepository.findAllByCloseTimeBeforeAndClosed(Date(), false)
+        val eventsToClose = eventRepository.findAllByCloseTimeBeforeAndClosed(Date(), false)
 
         for(event in eventsToClose) {
             event.isClosed = true
-            var notAttended = userRepository.findAllByOrganizations(event.organization).toMutableList()
+            val notAttended = userRepository.findAllByOrganizations(event.organization).toMutableList()
             notAttended.removeAll(event.attended)
             event.notAttended.addAll(notAttended)
 
             for(user in notAttended) {
-                var barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
-                var userRole = roleRepository.findByOrganizationAndUsers(event.organization, user)
+                val barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
+                val userRole = roleRepository.findByOrganizationAndUsers(event.organization, user)
                 if(event.category.requiredFor.contains(userRole)) {
                     barDetails.score -= event.category.penalty
                 }
@@ -49,7 +49,7 @@ class ScheduledTasks {
 
     @Scheduled(fixedRate = 60000)
     fun removeUnapprovedEvents() {
-        var eventsToRemove = eventRepository.findAllByStartTimeBeforeAndApprovedBy(Date(), null)
+        val eventsToRemove = eventRepository.findAllByStartTimeBeforeAndApprovedBy(Date(), null)
         eventRepository.deleteAll(eventsToRemove)
     }
 
