@@ -50,11 +50,11 @@ class RoleService {
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageRoles")) {
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageRoles")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        if (!possiblePermissions.containsAll(addRoleForm.permissions)) {
+        if(!possiblePermissions.containsAll(addRoleForm.permissions)) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -80,7 +80,7 @@ class RoleService {
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageRoles")) {
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageRoles")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -111,7 +111,7 @@ class RoleService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 

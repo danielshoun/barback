@@ -31,13 +31,13 @@ abstract class BaseEntity<T : Serializable> : Persistable<T> {
     override fun equals(other: Any?): Boolean {
         other ?: return false
 
-        if (this === other) return true
+        if(this === other) return true
 
-        if (javaClass != ProxyUtils.getUserClass(other)) return false
+        if(javaClass != ProxyUtils.getUserClass(other)) return false
 
         other as BaseEntity<*>
 
-        return if (null == this.getId()) false else this.getId() == other.getId()
+        return if(null == this.getId()) false else this.getId() == other.getId()
     }
 
     override fun hashCode(): Int {

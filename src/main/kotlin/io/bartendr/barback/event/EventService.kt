@@ -48,19 +48,19 @@ class EventService {
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canSubmitEvents") && !requesterRole.permissions.contains("canManageEvents")) {
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canSubmitEvents") && !requesterRole.permissions.contains("canManageEvents")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        if (addEventForm.startTime.before(Date()) && !(requesterRole.permissions.contains("SUPERADMIN") || requesterRole.permissions.contains("canManageEvents"))) {
+        if(addEventForm.startTime.before(Date()) && !(requesterRole.permissions.contains("SUPERADMIN") || requesterRole.permissions.contains("canManageEvents"))) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (addEventForm.closeTime.before(Date()) && !(requesterRole.permissions.contains("SUPERADMIN") || requesterRole.permissions.contains("canManageEvents"))) {
+        if(addEventForm.closeTime.before(Date()) && !(requesterRole.permissions.contains("SUPERADMIN") || requesterRole.permissions.contains("canManageEvents"))) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (addEventForm.startTime.after(addEventForm.closeTime)) {
+        if(addEventForm.startTime.after(addEventForm.closeTime)) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -77,11 +77,11 @@ class EventService {
                 category = category
         )
 
-        if (requesterRole.permissions.contains("SUPERADMIN") || requesterRole.permissions.contains("canManageEvents")) {
+        if(requesterRole.permissions.contains("SUPERADMIN") || requesterRole.permissions.contains("canManageEvents")) {
             newEvent.approvedBy = requester
         }
 
-        if (newEvent.closeTime.before(Date()) && newEvent.category.requiredFor.size > 0) {
+        if(newEvent.closeTime.before(Date()) && newEvent.category.requiredFor.size > 0) {
             val orgUsers = userRepository.findAllByOrganizations(organization)
             newEvent.notAttended.addAll(orgUsers)
 
@@ -124,6 +124,55 @@ class EventService {
         event.approvedBy = requester
         eventRepository.save(event)
         return ResponseEntity(HttpStatus.OK)
+    }
+
+    fun signIn(
+            organizationId: Long,
+            eventId: Long,
+            secret: String,
+            session: String
+    ): ResponseEntity<String> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        if(requesterRole.permissions.contains("UNAPPROVED")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        val event = eventRepository.findByIdOrNull(eventId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        if(event.closeTime.before(Date()) && event.startTime.after(Date())) {
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
+
+        if(secret != event.secret) {
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
+
+        event.attended.add(requester)
+
+        var barDetails = barDetailsRepository.findByUserAndOrganization(requester, organization)
+        barDetails.score += event.value
+        if(event.category.requiredFor.size == 0) {
+            for(flag in barDetails.flags) {
+                if (flag.category == event.category) {
+                    flag.completed = true
+                }
+            }
+        }
+
+        eventRepository.save(event)
+        barDetailsRepository.save(barDetails)
+
+        return ResponseEntity(HttpStatus.OK)
+
     }
 
 }

@@ -29,23 +29,23 @@ class UserService {
     fun register(
             regForm: RegForm
     ): ResponseEntity<String> {
-        if (userRepository.findByEmailAddress(regForm.emailAddress.toLowerCase()) != null) {
+        if(userRepository.findByEmailAddress(regForm.emailAddress.toLowerCase()) != null) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (regForm.firstName == "") {
+        if(regForm.firstName == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (regForm.lastName == "") {
+        if(regForm.lastName == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (regForm.emailAddress == "" || !regForm.emailAddress.contains("@")) {
+        if(regForm.emailAddress == "" || !regForm.emailAddress.contains("@")) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (regForm.plainTextPassword == "" || regForm.plainTextPassword.length < 8) {
+        if(regForm.plainTextPassword == "" || regForm.plainTextPassword.length < 8) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -57,7 +57,7 @@ class UserService {
                 dateOfBirth = regForm.dateOfBirth
         )
 
-        if (userRepository.findAll().isEmpty()) {
+        if(userRepository.findAll().isEmpty()) {
             newUser.isWebsiteAdmin = true
         }
 
@@ -78,13 +78,13 @@ class UserService {
         val requester: User = userRepository.findByEmailAddress(loginForm.emailAddress.toLowerCase())?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.emailVerified) {
+        if(!requester.emailVerified) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        return if (bCryptPasswordEncoder.matches(loginForm.plainTextPassword, requester.hashedPassword)) {
+        return if(bCryptPasswordEncoder.matches(loginForm.plainTextPassword, requester.hashedPassword)) {
             val session = Session()
-            if (requester.sessions.size > 2) {
+            if(requester.sessions.size > 2) {
                 val sessionToDelete: Session = requester.sessions[0]
                 requester.sessions.remove(sessionToDelete)
                 sessionRepository.delete(sessionToDelete)
@@ -106,7 +106,7 @@ class UserService {
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         for (possibleSession in requester.sessions) {
-            if (session == possibleSession.key) {
+            if(session == possibleSession.key) {
                 requester.sessions.remove(possibleSession)
                 sessionRepository.delete(possibleSession)
                 userRepository.save(requester)

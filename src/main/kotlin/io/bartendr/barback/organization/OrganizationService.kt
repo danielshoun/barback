@@ -47,23 +47,23 @@ class OrganizationService {
         val school = requester.school?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (organizationRepository.findByRef(addOrganizationForm.ref) != null) {
+        if(organizationRepository.findByRef(addOrganizationForm.ref) != null) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (organizationRepository.findByNameAndSchool(addOrganizationForm.name, school) != null) {
+        if(organizationRepository.findByNameAndSchool(addOrganizationForm.name, school) != null) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (addOrganizationForm.name == "") {
+        if(addOrganizationForm.name == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (addOrganizationForm.ref == "") {
+        if(addOrganizationForm.ref == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (addOrganizationForm.secret == "") {
+        if(addOrganizationForm.secret == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -124,14 +124,14 @@ class OrganizationService {
         val organization = organizationRepository.findByRef(joinOrganizationForm.ref)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (organization.school != requester.school) {
+        if(organization.school != requester.school) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        return if (bCryptPasswordEncoder.matches(joinOrganizationForm.secret, organization.secret)) {
+        return if(bCryptPasswordEncoder.matches(joinOrganizationForm.secret, organization.secret)) {
             requester.organizations.add(organization)
 
-            if (organization.organizationSettings.requireUserApproval) {
+            if(organization.organizationSettings.requireUserApproval) {
                 val unapprovedRole = roleRepository.findByOrganizationAndPermissions(organization, "UNAPPROVED")
                 unapprovedRole.users.add(requester)
                 roleRepository.save(unapprovedRole)
@@ -153,7 +153,7 @@ class OrganizationService {
             val eventCategories: List<EventCategory> = eventCategoryRepository.findAllByOrganization(organization)
 
             for(category in eventCategories) {
-                if (category.requiredFor.size == 0) {
+                if(category.requiredFor.size == 0) {
                     barDetails.flags.add(Flag(
                             category = category,
                             completed = false
@@ -184,7 +184,7 @@ class OrganizationService {
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -194,7 +194,7 @@ class OrganizationService {
         val unapprovedUserRole = roleRepository.findByOrganizationAndUsers(organization, unapprovedUser)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!unapprovedUserRole.permissions.contains("UNAPPROVED")) {
+        if(!unapprovedUserRole.permissions.contains("UNAPPROVED")) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -220,7 +220,7 @@ class OrganizationService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -237,7 +237,7 @@ class OrganizationService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -247,7 +247,7 @@ class OrganizationService {
         for (user in users) {
             val role = roleRepository.findByOrganizationAndUsers(organization, user)?:
                     continue
-            if (role.permissions.contains("UNAPPROVED")) {
+            if(role.permissions.contains("UNAPPROVED")) {
                 unapprovedUsers.add(user)
             }
         }
@@ -270,7 +270,7 @@ class OrganizationService {
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -289,7 +289,7 @@ class OrganizationService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -297,7 +297,7 @@ class OrganizationService {
         var barDetailsToRemove = mutableListOf<BarDetails>()
 
         for (barDetails in barDetailsList) {
-            if (roleRepository.findByOrganizationAndUsers(organization, barDetails.user)!!.permissions.contains("UNAPPROVED")) {
+            if(roleRepository.findByOrganizationAndUsers(organization, barDetails.user)!!.permissions.contains("UNAPPROVED")) {
                         barDetailsToRemove.add(barDetails)
                     }
         }
@@ -317,7 +317,7 @@ class OrganizationService {
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -340,7 +340,7 @@ class OrganizationService {
         val role = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        return if (role.permissions.contains("SUPERADMIN") || role.permissions.contains("canAddEventCategories")) {
+        return if(role.permissions.contains("SUPERADMIN") || role.permissions.contains("canAddEventCategories")) {
             val requiredRoles: MutableList<Role> = roleRepository.findAllById(addCategoryForm.requiredRoleIds)
 
             val eventCategory = EventCategory(
@@ -354,7 +354,7 @@ class OrganizationService {
 
             for (user in userRepository.findAllByOrganizations(organization)) {
                 val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
-                if (eventCategory.requiredFor.size == 0) {
+                if(eventCategory.requiredFor.size == 0) {
                     barDetails.flags.add(Flag(
                             category = eventCategory,
                             completed = false

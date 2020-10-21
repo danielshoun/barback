@@ -31,10 +31,10 @@ class UserController {
             response: HttpServletResponse
     ): ResponseEntity<String> {
         val responseEntity = userService.login(loginForm)
-        return if (responseEntity.statusCode == HttpStatus.ACCEPTED) {
+        return if(responseEntity.statusCode == HttpStatus.ACCEPTED) {
             val sessionCookie = Cookie("session", responseEntity.body)
             sessionCookie.path = "/"
-            if (loginForm.stayLoggedIn) {
+            if(loginForm.stayLoggedIn) {
                 sessionCookie.maxAge = 60*60*24*365
             }
             else {
@@ -54,7 +54,7 @@ class UserController {
             response: HttpServletResponse
     ): ResponseEntity<String> {
         val responseEntity = userService.logout(session)
-        return if (responseEntity.body == "LOGOUT") {
+        return if(responseEntity.body == "LOGOUT") {
             val sessionCookie = Cookie("session", null)
             sessionCookie.path = "/"
             sessionCookie.maxAge = 0
