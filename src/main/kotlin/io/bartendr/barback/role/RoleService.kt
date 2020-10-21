@@ -89,7 +89,7 @@ class RoleService {
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
 
-        for (user in usersToGive) {
+        for(user in usersToGive) {
             val oldRole = roleRepository.findByOrganizationAndUsers(organization, user)?:
                     return ResponseEntity(HttpStatus.BAD_REQUEST)
 

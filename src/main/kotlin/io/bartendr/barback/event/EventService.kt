@@ -1,6 +1,7 @@
 package io.bartendr.barback.event
 
 import io.bartendr.barback.event.form.AddEventForm
+import io.bartendr.barback.event.form.EditAttendanceForm
 import io.bartendr.barback.organization.OrganizationRepository
 import io.bartendr.barback.role.RoleRepository
 import io.bartendr.barback.user.BarDetailsRepository
@@ -85,8 +86,8 @@ class EventService {
             val orgUsers = userRepository.findAllByOrganizations(organization)
             newEvent.notAttended.addAll(orgUsers)
 
-            for (requiredRole in newEvent.category.requiredFor) {
-                for (user in requiredRole.users) {
+            for(requiredRole in newEvent.category.requiredFor) {
+                for(user in requiredRole.users) {
                     var barDetails = barDetailsRepository.findByUserAndOrganization(user, newEvent.organization)
                     barDetails.score -= newEvent.category.penalty
                     barDetailsRepository.save(barDetails)
@@ -152,6 +153,10 @@ class EventService {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
+        if(event.attended.contains(requester)) {
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
+
         if(secret != event.secret) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
@@ -162,7 +167,7 @@ class EventService {
         barDetails.score += event.value
         if(event.category.requiredFor.size == 0) {
             for(flag in barDetails.flags) {
-                if (flag.category == event.category) {
+                if(flag.category == event.category) {
                     flag.completed = true
                 }
             }
@@ -173,6 +178,72 @@ class EventService {
 
         return ResponseEntity(HttpStatus.OK)
 
+    }
+
+    fun editAttendance(
+            organizationId: Long,
+            eventId: Long,
+            editAttendanceForm: EditAttendanceForm,
+            session: String
+    ): ResponseEntity<String> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageEvents")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        val event = eventRepository.findByIdOrNull(eventId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        if(event.closeTime.after(Date())) {
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
+
+        val newAttended = userRepository.findAllById(editAttendanceForm.attendedIds)
+        val newNotAttended = userRepository.findAllById(editAttendanceForm.notAttendedIds)
+
+        newAttended.removeAll(event.attended)
+        newNotAttended.removeAll(event.notAttended)
+
+        for(user in newAttended) {
+            var barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
+            barDetails.score += event.value
+            for(flag in barDetails.flags) {
+                if(flag.category == event.category) {
+                    flag.completed = true
+                }
+            }
+            barDetailsRepository.save(barDetails)
+        }
+
+        for(user in newNotAttended) {
+            var barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
+            barDetails.score -= event.value
+            for(flag in barDetails.flags) {
+                if(flag.category == event.category) {
+                    if(eventRepository.findByCategoryAndAttended(event.category, user).size < 2){
+                        flag.completed = false
+                    }
+                }
+            }
+            barDetailsRepository.save(barDetails)
+        }
+
+        event.attended.removeAll(newNotAttended)
+        event.attended.addAll(newAttended)
+        event.notAttended.removeAll(newAttended)
+        event.notAttended.removeAll(newNotAttended)
+
+        eventRepository.save(event)
+
+        return ResponseEntity(HttpStatus.OK)
     }
 
 }

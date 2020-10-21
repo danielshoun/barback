@@ -244,7 +244,7 @@ class OrganizationService {
         val users = userRepository.findAllByOrganizations(organization).toMutableList()
         val unapprovedUsers: MutableList<User> = mutableListOf()
 
-        for (user in users) {
+        for(user in users) {
             val role = roleRepository.findByOrganizationAndUsers(organization, user)?:
                     continue
             if(role.permissions.contains("UNAPPROVED")) {
@@ -296,7 +296,7 @@ class OrganizationService {
         val barDetailsList = barDetailsRepository.findAllByOrganization(organization)
         var barDetailsToRemove = mutableListOf<BarDetails>()
 
-        for (barDetails in barDetailsList) {
+        for(barDetails in barDetailsList) {
             if(roleRepository.findByOrganizationAndUsers(organization, barDetails.user)!!.permissions.contains("UNAPPROVED")) {
                         barDetailsToRemove.add(barDetails)
                     }
@@ -352,7 +352,7 @@ class OrganizationService {
 
             eventCategoryRepository.save(eventCategory)
 
-            for (user in userRepository.findAllByOrganizations(organization)) {
+            for(user in userRepository.findAllByOrganizations(organization)) {
                 val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
                 if(eventCategory.requiredFor.size == 0) {
                     barDetails.flags.add(Flag(

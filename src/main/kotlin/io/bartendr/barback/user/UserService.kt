@@ -105,7 +105,7 @@ class UserService {
         val requester: User = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        for (possibleSession in requester.sessions) {
+        for(possibleSession in requester.sessions) {
             if(session == possibleSession.key) {
                 requester.sessions.remove(possibleSession)
                 sessionRepository.delete(possibleSession)
