@@ -9,6 +9,6 @@ interface UserRepository : JpaRepository<User, Long> {
     fun findByEmailAddress(emailAddress: String): User?
     fun findByEmailVerificationToken(emailVerificationToken: String): User?
     fun findByForgottenPasswordToken(forgottenPasswordToken: String): User?
-    fun findAllByOrganizationsContaining(organization: Organization): List<User>
+    fun findAllByOrganizations(organization: Organization): List<User>
 
 }

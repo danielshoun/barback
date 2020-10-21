@@ -17,11 +17,11 @@ class Event(
         var closeTime: Date,
         var secret: String = generateSecret(),
         @ManyToOne var requester: User,
-        @ManyToOne var approvedBy: User,
+        @ManyToOne var approvedBy: User? = null,
         @ManyToOne var organization: Organization,
         @ManyToOne var category: EventCategory,
-        @ManyToMany(targetEntity = User::class) var attended: List<User> = mutableListOf(),
-        @ManyToMany(targetEntity = User::class) var notAttended: List<User> = mutableListOf(),
+        @ManyToMany(targetEntity = User::class) var attended: MutableList<User> = mutableListOf(),
+        @ManyToMany(targetEntity = User::class) var notAttended: MutableList<User> = mutableListOf(),
         var isOpen: Boolean = false,
         var isClosed: Boolean = false
 ) : BaseEntity<Long>() {

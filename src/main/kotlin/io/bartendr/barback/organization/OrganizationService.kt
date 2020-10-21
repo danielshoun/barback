@@ -147,10 +147,12 @@ class OrganizationService {
             val eventCategories: List<EventCategory> = eventCategoryRepository.findAllByOrganization(organization)
 
             for(category in eventCategories) {
-                barDetails.flags.add(Flag(
-                        category = category,
-                        completed = false
-                ))
+                if (category.requiredFor.size == 0) {
+                    barDetails.flags.add(Flag(
+                            category = category,
+                            completed = false
+                    ))
+                }
             }
 
             barDetailsRepository.save(barDetails)
@@ -223,7 +225,7 @@ class OrganizationService {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        val users = userRepository.findAllByOrganizationsContaining(organization).toMutableList()
+        val users = userRepository.findAllByOrganizations(organization).toMutableList()
         val unapprovedUsers: MutableList<User> = mutableListOf()
 
         for (user in users) {
@@ -321,12 +323,14 @@ class OrganizationService {
 
             eventCategoryRepository.save(eventCategory)
 
-            for (user in userRepository.findAllByOrganizationsContaining(organization)) {
+            for (user in userRepository.findAllByOrganizations(organization)) {
                 val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
-                barDetails.flags.add(Flag(
-                        category = eventCategory,
-                        completed = false
-                ))
+                if (eventCategory.requiredFor.size == 0) {
+                    barDetails.flags.add(Flag(
+                            category = eventCategory,
+                            completed = false
+                    ))
+                }
                 barDetailsRepository.save(barDetails)
             }
 

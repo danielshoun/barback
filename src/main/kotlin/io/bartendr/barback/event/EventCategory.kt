@@ -12,6 +12,6 @@ import javax.persistence.ManyToOne
 class EventCategory(
         var name: String,
         var penalty: Int,
-        @ManyToMany var requiredFor: MutableList<Role>,
+        @ManyToMany var requiredFor: MutableList<Role> = mutableListOf(),
         @ManyToOne(cascade = [CascadeType.ALL]) var organization: Organization
 ) : BaseEntity<Long>()
