@@ -85,6 +85,7 @@ class EventService {
         if(newEvent.closeTime.before(Date()) && newEvent.category.requiredFor.size > 0) {
             val orgUsers = userRepository.findAllByOrganizations(organization)
             newEvent.notAttended.addAll(orgUsers)
+            newEvent.closed = true
 
             for(requiredRole in newEvent.category.requiredFor) {
                 for(user in requiredRole.users) {
@@ -239,7 +240,7 @@ class EventService {
         event.attended.removeAll(newNotAttended)
         event.attended.addAll(newAttended)
         event.notAttended.removeAll(newAttended)
-        event.notAttended.removeAll(newNotAttended)
+        event.notAttended.addAll(newNotAttended)
 
         eventRepository.save(event)
 
