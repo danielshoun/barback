@@ -264,4 +264,24 @@ class EventService {
         return ResponseEntity(HttpStatus.OK)
     }
 
+    fun getSecret(organizationId: Long, eventId: Long, session: String): ResponseEntity<String> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val event = eventRepository.findByIdOrNull(eventId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        if(event.requester != requester && !requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageEvents")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        return ResponseEntity(event.secret, HttpStatus.OK)
+    }
+
 }

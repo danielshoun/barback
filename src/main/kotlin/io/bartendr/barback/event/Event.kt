@@ -1,5 +1,6 @@
 package io.bartendr.barback.event
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.bartendr.barback.model.BaseEntity
 import io.bartendr.barback.organization.Organization
 import io.bartendr.barback.user.User
@@ -15,7 +16,7 @@ class Event(
         var value: Int,
         var startTime: Date,
         var closeTime: Date,
-        var secret: String = generateSecret(),
+        @JsonIgnore var secret: String = generateSecret(),
         @ManyToOne var requester: User,
         @ManyToOne var approvedBy: User? = null,
         @ManyToOne var organization: Organization,

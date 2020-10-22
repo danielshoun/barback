@@ -51,4 +51,13 @@ class EventController {
         return eventService.editAttendance(organizationId, eventId, editAttendanceForm, session)
     }
 
+    @GetMapping("/api/v1/organization/{organizationId}/events/{eventId}/secret")
+    fun getSecret(
+            @PathVariable(name = "organizationId") organizationId: Long,
+            @PathVariable(name = "eventId") eventId: Long,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<String> {
+        return eventService.getSecret(organizationId, eventId, session)
+    }
+
 }
