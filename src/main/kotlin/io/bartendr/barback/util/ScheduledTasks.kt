@@ -25,9 +25,6 @@ class ScheduledTasks {
     @Autowired
     lateinit var barDetailsRepository: BarDetailsRepository
 
-    @Autowired
-    lateinit var roleRepository: RoleRepository
-
     @Scheduled(fixedRate = 60000)
     fun closeEvents() {
         val eventsToClose = eventRepository.findAllByCloseTimeBeforeAndClosed(Date(), false)
@@ -45,7 +42,7 @@ class ScheduledTasks {
                     barDetailsRepository.save(barDetails)
                 }
             }
-            
+
             eventRepository.save(event)
         }
     }
