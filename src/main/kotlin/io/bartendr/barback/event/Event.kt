@@ -16,7 +16,7 @@ class Event(
         var value: Int,
         var startTime: Date,
         var closeTime: Date,
-        @JsonIgnore var secret: String = generateSecret(),
+        var secret: String = generateSecret(),
         @ManyToOne var requester: User,
         @ManyToOne var approvedBy: User? = null,
         @ManyToOne var organization: Organization,
