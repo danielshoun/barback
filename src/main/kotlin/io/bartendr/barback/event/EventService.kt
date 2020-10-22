@@ -245,7 +245,7 @@ class EventService {
             if(event.category.requiredFor.size > 0) {
                 for (flag in barDetails.flags) {
                     if (flag.category == event.category) {
-                        if (eventRepository.findByCategoryAndAttended(event.category, user).size < 2) {
+                        if (eventRepository.findAllByCategoryAndAttended(event.category, user).size < 2) {
                             flag.completed = false
                         }
                     }
@@ -264,7 +264,95 @@ class EventService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun getSecret(organizationId: Long, eventId: Long, session: String): ResponseEntity<String> {
+    fun getOpenEvents(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<Event>> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        if(requesterRole.permissions.contains("UNAPPROVED")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        val events = eventRepository.findAllByOrganizationAndStartTimeBeforeAndClosed(organization, Date(), false)
+        return ResponseEntity(events, HttpStatus.OK)
+    }
+
+    fun getPastEvents(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<Event>> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        if(requesterRole.permissions.contains("UNAPPROVED")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        val events = eventRepository.findAllByOrganizationAndClosed(organization, true)
+        return ResponseEntity(events, HttpStatus.OK)
+    }
+
+    fun getUpcomingEvents(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<Event>> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        if(requesterRole.permissions.contains("UNAPPROVED")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        val events = eventRepository.findAllByOrganizationAndStartTimeAfter(organization, Date())
+        return ResponseEntity(events, HttpStatus.OK)
+    }
+
+    fun getUnapprovedEvents(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<Event>> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageEvents")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        val events = eventRepository.findAllByOrganizationAndApprovedBy(organization, null)
+        return ResponseEntity(events, HttpStatus.OK)
+    }
+
+    fun getSecret(
+            organizationId: Long,
+            eventId: Long,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 

@@ -51,6 +51,38 @@ class EventController {
         return eventService.editAttendance(organizationId, eventId, editAttendanceForm, session)
     }
 
+    @GetMapping("/api/v1/organization/{organizationId}/events/open")
+    fun getOpenEvents(
+            @PathVariable(name = "organizationId") organizationId: Long,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<List<Event>> {
+        return eventService.getOpenEvents(organizationId, session)
+    }
+
+    @GetMapping("/api/v1/organization/{organizationId}/events/past")
+    fun getPastEvents(
+            @PathVariable(name = "organizationId") organizationId: Long,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<List<Event>> {
+        return eventService.getPastEvents(organizationId, session)
+    }
+
+    @GetMapping("/api/v1/organization/{organizationId}/events/upcoming")
+    fun getUpcomingEvents(
+            @PathVariable(name = "organizationId") organizationId: Long,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<List<Event>> {
+        return eventService.getUpcomingEvents(organizationId, session)
+    }
+
+    @GetMapping("/api/v1/organization/{organizationId}/events/unapproved")
+    fun getUnapprovedEvents(
+            @PathVariable(name = "organizationId") organizationId: Long,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<List<Event>> {
+        return eventService.getUnapprovedEvents(organizationId, session)
+    }
+
     @GetMapping("/api/v1/organization/{organizationId}/events/{eventId}/secret")
     fun getSecret(
             @PathVariable(name = "organizationId") organizationId: Long,
