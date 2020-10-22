@@ -38,14 +38,14 @@ class ScheduledTasks {
             notAttended.removeAll(event.attended)
             event.notAttended.addAll(notAttended)
 
-            for(user in notAttended) {
-                val barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
-                val userRole = roleRepository.findByOrganizationAndUsers(event.organization, user)
-                if(event.category.requiredFor.contains(userRole)) {
+            for(requiredRole in event.category.requiredFor) {
+                for(user in requiredRole.users) {
+                    val barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
                     barDetails.score -= event.category.penalty
+                    barDetailsRepository.save(barDetails)
                 }
-                barDetailsRepository.save(barDetails)
             }
+            
             eventRepository.save(event)
         }
     }
