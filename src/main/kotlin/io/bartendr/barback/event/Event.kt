@@ -22,7 +22,7 @@ class Event(
         @ManyToOne var category: EventCategory,
         @ManyToMany(targetEntity = User::class) var attended: MutableList<User> = mutableListOf(),
         @ManyToMany(targetEntity = User::class) var notAttended: MutableList<User> = mutableListOf(),
-        var isClosed: Boolean = false
+        var closed: Boolean = false
 ) : BaseEntity<Long>() {
 
     companion object {
@@ -31,7 +31,7 @@ class Event(
             return Random().ints(5, 0, source.length)
             .asSequence()
             .map(source::get)
-            .joinToString()
+            .joinToString("")
         }
     }
 
