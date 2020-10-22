@@ -209,6 +209,10 @@ class EventService {
         val newAttended = userRepository.findAllById(editAttendanceForm.attendedIds)
         val newNotAttended = userRepository.findAllById(editAttendanceForm.notAttendedIds)
 
+        if(!userRepository.findAllByOrganizations(event.organization).containsAll(newAttended + newNotAttended)) {
+            return ResponseEntity(HttpStatus.BAD_REQUEST)
+        }
+
         newAttended.removeAll(event.attended)
         newNotAttended.removeAll(event.notAttended)
 
