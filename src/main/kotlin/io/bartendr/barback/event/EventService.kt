@@ -87,12 +87,11 @@ class EventService {
             newEvent.notAttended.addAll(orgUsers)
             newEvent.closed = true
 
-            for(requiredRole in newEvent.category.requiredFor) {
-                for(user in requiredRole.users) {
+            for(role in newEvent.category.requiredFor) {
+                for(user in role.users) {
                     val barDetails = barDetailsRepository.findByUserAndOrganization(user, newEvent.organization)
                     barDetails.score -= newEvent.category.penalty
                     barDetailsRepository.save(barDetails)
-
                 }
             }
         }
@@ -216,9 +215,16 @@ class EventService {
         for(user in newAttended) {
             val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
             barDetails.score += event.value
-            for(flag in barDetails.flags) {
-                if(flag.category == event.category) {
-                    flag.completed = true
+            for(role in event.category.requiredFor) {
+                if(role.users.contains(user)) {
+                    barDetails.score += event.category.penalty
+                }
+            }
+            if(event.category.requiredFor.size > 0) {
+                for (flag in barDetails.flags) {
+                    if (flag.category == event.category) {
+                        flag.completed = true
+                    }
                 }
             }
             barDetailsRepository.save(barDetails)
@@ -227,10 +233,17 @@ class EventService {
         for(user in newNotAttended) {
             val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
             barDetails.score -= event.value
-            for(flag in barDetails.flags) {
-                if(flag.category == event.category) {
-                    if(eventRepository.findByCategoryAndAttended(event.category, user).size < 2){
-                        flag.completed = false
+            for(role in event.category.requiredFor) {
+                if(role.users.contains(user)) {
+                    barDetails.score -= event.category.penalty
+                }
+            }
+            if(event.category.requiredFor.size > 0) {
+                for (flag in barDetails.flags) {
+                    if (flag.category == event.category) {
+                        if (eventRepository.findByCategoryAndAttended(event.category, user).size < 2) {
+                            flag.completed = false
+                        }
                     }
                 }
             }

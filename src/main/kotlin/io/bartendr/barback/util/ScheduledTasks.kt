@@ -37,9 +37,11 @@ class ScheduledTasks {
 
             for(requiredRole in event.category.requiredFor) {
                 for(user in requiredRole.users) {
-                    val barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
-                    barDetails.score -= event.category.penalty
-                    barDetailsRepository.save(barDetails)
+                    if(notAttended.contains(user)) {
+                        val barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
+                        barDetails.score -= event.category.penalty
+                        barDetailsRepository.save(barDetails)
+                    }
                 }
             }
 
