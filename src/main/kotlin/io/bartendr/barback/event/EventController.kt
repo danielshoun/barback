@@ -31,6 +31,15 @@ class EventController {
         return eventService.approveEvent(organizationId, eventId, session)
     }
 
+    @PostMapping("/api/v1/organization/{organizationId}/events/{eventId}/deny")
+    fun denyEvent(
+            @PathVariable(name = "organizationId") organizationId: Long,
+            @PathVariable(name = "eventId") eventId: Long,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<String> {
+        return eventService.denyEvent(organizationId, eventId, session)
+    }
+
     @PostMapping("/api/v1/organization/{organizationId}/events/{eventId}/sign-in")
     fun signIn(
             @PathVariable(name = "organizationId") organizationId: Long,

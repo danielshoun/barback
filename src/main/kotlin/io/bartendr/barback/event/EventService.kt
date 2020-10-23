@@ -127,6 +127,31 @@ class EventService {
         return ResponseEntity(HttpStatus.OK)
     }
 
+    fun denyEvent(
+            organizationId: Long,
+            eventId: Long,
+            session: String
+    ): ResponseEntity<String> {
+        val requester = userRepository.findBySessions_Key(session)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val organization = organizationRepository.findByIdOrNull(organizationId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
+                return ResponseEntity(HttpStatus.UNAUTHORIZED)
+
+        val event = eventRepository.findByIdOrNull(eventId)?:
+                return ResponseEntity(HttpStatus.BAD_REQUEST)
+
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageEvents")) {
+            return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        }
+
+        eventRepository.delete(event)
+        return ResponseEntity(HttpStatus.OK)
+    }
+
     fun signIn(
             organizationId: Long,
             eventId: Long,
