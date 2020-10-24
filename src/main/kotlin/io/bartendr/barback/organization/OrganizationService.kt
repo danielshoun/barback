@@ -2,6 +2,7 @@ package io.bartendr.barback.organization
 
 import io.bartendr.barback.event.EventCategory
 import io.bartendr.barback.event.EventCategoryRepository
+import io.bartendr.barback.event.EventRepository
 import io.bartendr.barback.organization.form.*
 import io.bartendr.barback.role.Role
 import io.bartendr.barback.role.RoleRepository
@@ -34,6 +35,9 @@ class OrganizationService {
 
     @Autowired
     lateinit var eventCategoryRepository: EventCategoryRepository
+
+    @Autowired
+    lateinit var eventRepository: EventRepository
 
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
 
@@ -153,11 +157,23 @@ class OrganizationService {
             val eventCategories: List<EventCategory> = eventCategoryRepository.findAllByOrganization(organization)
 
             for(category in eventCategories) {
-                if(category.requiredFor.size == 0) {
+                if(category.requiredFor.size == 0 && !category.requiredForAll) {
                     barDetails.flags.add(Flag(
                             category = category,
                             completed = false
                     ))
+                }
+                if(category.requiredForAll) {
+                    val events = eventRepository.findAllByCategory(category)
+                    for(event in events) {
+                        barDetails.score -= category.penalty
+                    }
+                }
+                if(category.requiredFor.contains(roleRepository.findByOrganizationAndPermissions(organization, "DEFAULT"))) {
+                    val events = eventRepository.findAllByCategory(category)
+                    for (event in events) {
+                        barDetails.score -= category.penalty
+                    }
                 }
             }
 
@@ -346,6 +362,7 @@ class OrganizationService {
             val eventCategory = EventCategory(
                     name = addCategoryForm.name,
                     penalty = addCategoryForm.penalty,
+                    requiredForAll = addCategoryForm.requiredForAll,
                     requiredFor = requiredRoles,
                     organization = organization
             )
@@ -354,7 +371,7 @@ class OrganizationService {
 
             for(user in userRepository.findAllByOrganizations(organization)) {
                 val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
-                if(eventCategory.requiredFor.size == 0) {
+                if(eventCategory.requiredFor.size == 0 && !eventCategory.requiredForAll) {
                     barDetails.flags.add(Flag(
                             category = eventCategory,
                             completed = false

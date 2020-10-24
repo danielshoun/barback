@@ -82,16 +82,25 @@ class EventService {
             newEvent.approvedBy = requester
         }
 
-        if(newEvent.closeTime.before(Date()) && newEvent.category.requiredFor.size > 0) {
+        if(newEvent.closeTime.before(Date()) && (newEvent.category.requiredFor.size > 0 || newEvent.category.requiredForAll)) {
             val orgUsers = userRepository.findAllByOrganizations(organization)
             newEvent.notAttended.addAll(orgUsers)
             newEvent.closed = true
 
-            for(role in newEvent.category.requiredFor) {
-                for(user in role.users) {
+            if(newEvent.category.requiredForAll) {
+                for(user in newEvent.notAttended) {
                     val barDetails = barDetailsRepository.findByUserAndOrganization(user, newEvent.organization)
                     barDetails.score -= newEvent.category.penalty
                     barDetailsRepository.save(barDetails)
+                }
+            }
+            else {
+                for (role in newEvent.category.requiredFor) {
+                    for (user in role.users) {
+                        val barDetails = barDetailsRepository.findByUserAndOrganization(user, newEvent.organization)
+                        barDetails.score -= newEvent.category.penalty
+                        barDetailsRepository.save(barDetails)
+                    }
                 }
             }
         }
@@ -190,7 +199,7 @@ class EventService {
 
         val barDetails = barDetailsRepository.findByUserAndOrganization(requester, organization)
         barDetails.score += event.value
-        if(event.category.requiredFor.size == 0) {
+        if(event.category.requiredFor.size == 0 && !event.category.requiredForAll) {
             for(flag in barDetails.flags) {
                 if(flag.category == event.category) {
                     flag.completed = true
@@ -244,12 +253,17 @@ class EventService {
         for(user in newAttended) {
             val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
             barDetails.score += event.value
-            for(role in event.category.requiredFor) {
-                if(role.users.contains(user)) {
-                    barDetails.score += event.category.penalty
+            if(event.category.requiredForAll) {
+                barDetails.score += event.category.penalty
+            }
+            else {
+                for (role in event.category.requiredFor) {
+                    if (role.users.contains(user)) {
+                        barDetails.score += event.category.penalty
+                    }
                 }
             }
-            if(event.category.requiredFor.size > 0) {
+            if(event.category.requiredFor.size > 0 && !event.category.requiredForAll) {
                 for (flag in barDetails.flags) {
                     if (flag.category == event.category) {
                         flag.completed = true
@@ -262,12 +276,17 @@ class EventService {
         for(user in newNotAttended) {
             val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
             barDetails.score -= event.value
-            for(role in event.category.requiredFor) {
-                if(role.users.contains(user)) {
-                    barDetails.score -= event.category.penalty
+            if(event.category.requiredForAll) {
+                barDetails.score -= event.category.penalty
+            }
+            else {
+                for (role in event.category.requiredFor) {
+                    if (role.users.contains(user)) {
+                        barDetails.score -= event.category.penalty
+                    }
                 }
             }
-            if(event.category.requiredFor.size > 0) {
+            if(event.category.requiredFor.size > 0 && !event.category.requiredForAll) {
                 for (flag in barDetails.flags) {
                     if (flag.category == event.category) {
                         if (eventRepository.findAllByCategoryAndAttended(event.category, user).size < 2) {

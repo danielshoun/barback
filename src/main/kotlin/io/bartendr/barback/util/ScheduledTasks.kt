@@ -35,12 +35,21 @@ class ScheduledTasks {
             notAttended.removeAll(event.attended)
             event.notAttended.addAll(notAttended)
 
-            for(requiredRole in event.category.requiredFor) {
-                for(user in requiredRole.users) {
-                    if(notAttended.contains(user)) {
-                        val barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
-                        barDetails.score -= event.category.penalty
-                        barDetailsRepository.save(barDetails)
+            if(event.category.requiredForAll) {
+                for(user in event.notAttended) {
+                    val barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
+                    barDetails.score -= event.category.penalty
+                    barDetailsRepository.save(barDetails)
+                }
+            }
+            else {
+                for (requiredRole in event.category.requiredFor) {
+                    for (user in requiredRole.users) {
+                        if (notAttended.contains(user)) {
+                            val barDetails = barDetailsRepository.findByUserAndOrganization(user, event.organization)
+                            barDetails.score -= event.category.penalty
+                            barDetailsRepository.save(barDetails)
+                        }
                     }
                 }
             }
