@@ -37,7 +37,7 @@ class RoleService {
                 "canManageUsers",
                 "canManageRoles",
                 "canSubmitEvents",
-                "canApproveEvents",
+                "canManageEvents",
                 "canAddEventCategories",
                 "canManagePolls")
 
