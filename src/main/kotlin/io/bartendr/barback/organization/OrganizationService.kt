@@ -178,6 +178,12 @@ class OrganizationService {
             }
 
             barDetailsRepository.save(barDetails)
+            
+            val closedEvents = eventRepository.findAllByOrganizationAndClosed(organization, true)
+            for(event in closedEvents) {
+                event.notAttended.add(requester)
+                eventRepository.save(event)
+            }
 
             ResponseEntity(HttpStatus.OK)
         }
