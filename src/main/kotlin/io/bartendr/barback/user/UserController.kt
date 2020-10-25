@@ -18,17 +18,23 @@ class UserController {
     lateinit var userService: UserService
 
     @PostMapping("/api/v1/user/register")
-    fun register(@RequestBody regForm: RegForm, response: HttpServletResponse): ResponseEntity<String> {
+    fun register(
+            @RequestBody regForm: RegForm,
+            response: HttpServletResponse
+    ): ResponseEntity<String> {
         return userService.register(regForm)
     }
 
     @PostMapping("/api/v1/user/login")
-    fun login(@RequestBody loginForm: LoginForm, response: HttpServletResponse): ResponseEntity<String> {
+    fun login(
+            @RequestBody loginForm: LoginForm,
+            response: HttpServletResponse
+    ): ResponseEntity<String> {
         val responseEntity = userService.login(loginForm)
-        return if (responseEntity.statusCode == HttpStatus.ACCEPTED) {
+        return if(responseEntity.statusCode == HttpStatus.ACCEPTED) {
             val sessionCookie = Cookie("session", responseEntity.body)
             sessionCookie.path = "/"
-            if (loginForm.stayLoggedIn) {
+            if(loginForm.stayLoggedIn) {
                 sessionCookie.maxAge = 60*60*24*365
             }
             else {
@@ -43,9 +49,12 @@ class UserController {
     }
 
     @PostMapping("/api/v1/user/logout")
-    fun logout(@CookieValue(value = "session") session: String, response: HttpServletResponse): ResponseEntity<String> {
+    fun logout(
+            @CookieValue(value = "session") session: String,
+            response: HttpServletResponse
+    ): ResponseEntity<String> {
         val responseEntity = userService.logout(session)
-        return if (responseEntity.body == "LOGOUT") {
+        return if(responseEntity.body == "LOGOUT") {
             val sessionCookie = Cookie("session", null)
             sessionCookie.path = "/"
             sessionCookie.maxAge = 0
@@ -58,38 +67,53 @@ class UserController {
     }
 
     @GetMapping("/api/v1/user/auth")
-    fun authCheck(@CookieValue(value = "session") session: String): ResponseEntity<User> {
+    fun authCheck(
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<User> {
         return userService.authCheck(session)
     }
 
     @PostMapping("/api/v1/user/verify")
-    fun verifyEmail(@RequestParam(name = "token") token: String): ResponseEntity<String> {
+    fun verifyEmail(
+            @RequestParam(name = "token") token: String
+    ): ResponseEntity<String> {
         return userService.verifyEmail(token)
     }
 
 
     @PostMapping("/api/v1/user/forgot")
-    fun forgotPassword(@RequestParam(name = "email") emailAddress: String): ResponseEntity<String> {
+    fun forgotPassword(
+            @RequestParam(name = "email") emailAddress: String
+    ): ResponseEntity<String> {
         return userService.forgotPassword(emailAddress)
     }
 
     @PostMapping("/api/v1/user/reset")
-    fun resetPassword(@RequestParam(name = "token") token: String, @RequestBody resetForm: ResetForm): ResponseEntity<String> {
+    fun resetPassword(
+            @RequestParam(name = "token") token: String,
+            @RequestBody resetForm: ResetForm
+    ): ResponseEntity<String> {
         return userService.resetPassword(token, resetForm.newPassword)
     }
 
     @GetMapping("/api/v1/user/{userId}")
-    fun getUser(@PathVariable(name = "userId") userId: Long): ResponseEntity<User> {
+    fun getUser(
+            @PathVariable(name = "userId") userId: Long
+    ): ResponseEntity<User> {
         return userService.getUser(userId)
     }
 
     @GetMapping("/api/v1/user/self")
-    fun getSelf(@CookieValue(value = "session") session: String): ResponseEntity<User> {
+    fun getSelf(
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<User> {
         return userService.getSelf(session)
     }
 
     @GetMapping("/api/v1/user/organizations")
-    fun getOwnOrganizations(@CookieValue(value = "session") session: String): ResponseEntity<List<Organization>> {
+    fun getOwnOrganizations(
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<List<Organization>> {
         return userService.getOwnOrganizations(session)
     }
 

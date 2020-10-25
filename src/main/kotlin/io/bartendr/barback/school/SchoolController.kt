@@ -13,37 +13,49 @@ class SchoolController {
     lateinit var schoolService: SchoolService
 
     @PostMapping("/api/v1/school/add")
-    fun addSchool(@RequestBody addSchoolForm: AddSchoolForm,
-                  @CookieValue(value = "session") session: String): ResponseEntity<String> {
+    fun addSchool(
+            @RequestBody addSchoolForm: AddSchoolForm,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<String> {
         return schoolService.addSchool(addSchoolForm, session)
     }
 
     @PostMapping("/api/v1/school/edit")
-    fun editSchool(@RequestBody editSchoolForm: EditSchoolForm,
-                   @CookieValue(value = "session") session: String): ResponseEntity<String> {
+    fun editSchool(
+            @RequestBody editSchoolForm: EditSchoolForm,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<String> {
         return schoolService.editSchool(editSchoolForm, session)
     }
 
     @PostMapping("/api/v1/school/{schoolId}/delete")
-    fun deleteSchool(@PathVariable schoolId: Long,
-                     @CookieValue(value = "session") session: String): ResponseEntity<String> {
+    fun deleteSchool(
+            @PathVariable schoolId: Long,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<String> {
         return schoolService.deleteSchool(schoolId, session)
     }
 
     @GetMapping("/api/v1/school/get-all")
-    fun getAllSchools(@CookieValue(value = "session") session: String): ResponseEntity<List<School>> {
+    fun getAllSchools(
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<List<School>> {
         return schoolService.getAllSchools(session)
     }
 
     @PostMapping("/api/v1/school/join")
-    fun joinSchool(@RequestParam(name = "ref", required = true) ref: String,
-                   @CookieValue(value = "session") session: String): ResponseEntity<String> {
+    fun joinSchool(
+            @RequestParam(name = "ref", required = true) ref: String,
+            @CookieValue(value = "session") session: String
+    ): ResponseEntity<String> {
         return schoolService.joinSchool(ref, session)
     }
 
     @GetMapping("/api/v1/school/{schoolId}/organizations")
-    fun getOrgsBySchool(@PathVariable schoolId: Long,
-                        @CookieValue(value = "session") session: String) {
+    fun getOrgsBySchool(
+            @PathVariable schoolId: Long,
+            @CookieValue(value = "session") session: String
+    ) {
         schoolService.getOrgsBySchool(schoolId, session)
     }
 

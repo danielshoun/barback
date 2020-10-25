@@ -5,7 +5,7 @@ import java.util.*
 
 interface PollRepository : JpaRepository<Poll, Long> {
 
-    fun findAllByStartTimeBeforeAndEndTimeAfter(startTime: Date, endTime: Date) : List<Poll>
-    fun findAllByEndTimeBefore(endTime: Date) : List<Poll>
+    fun findAllByStartTimeBeforeAndEndTimeAfter(startTime: Date, endTime: Date): List<Poll>
+    fun findAllByEndTimeBefore(endTime: Date): List<Poll>
 
 }

@@ -1,5 +1,6 @@
 package io.bartendr.barback.event
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import io.bartendr.barback.model.BaseEntity
 import io.bartendr.barback.organization.Organization
 import io.bartendr.barback.user.User
@@ -17,13 +18,12 @@ class Event(
         var closeTime: Date,
         var secret: String = generateSecret(),
         @ManyToOne var requester: User,
-        @ManyToOne var approvedBy: User,
+        @ManyToOne var approvedBy: User? = null,
         @ManyToOne var organization: Organization,
         @ManyToOne var category: EventCategory,
-        @ManyToMany(targetEntity = User::class) var attended: List<User> = mutableListOf(),
-        @ManyToMany(targetEntity = User::class) var notAttended: List<User> = mutableListOf(),
-        var isOpen: Boolean = false,
-        var isClosed: Boolean = false
+        @ManyToMany(targetEntity = User::class) var attended: MutableList<User> = mutableListOf(),
+        @ManyToMany(targetEntity = User::class) var notAttended: MutableList<User> = mutableListOf(),
+        var closed: Boolean = false
 ) : BaseEntity<Long>() {
 
     companion object {
@@ -32,7 +32,7 @@ class Event(
             return Random().ints(5, 0, source.length)
             .asSequence()
             .map(source::get)
-            .joinToString()
+            .joinToString("")
         }
     }
 

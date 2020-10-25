@@ -23,19 +23,22 @@ class SchoolService {
     @Autowired
     lateinit var organizationRepository: OrganizationRepository
 
-    fun addSchool(addSchoolForm: AddSchoolForm, session: String): ResponseEntity<String> {
+    fun addSchool(
+            addSchoolForm: AddSchoolForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        if (!requester.isWebsiteAdmin) {
+        if(!requester.isWebsiteAdmin) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        if (schoolRepository.findByName(addSchoolForm.name) != null) {
+        if(schoolRepository.findByName(addSchoolForm.name) != null) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (schoolRepository.findByRef(addSchoolForm.ref) != null) {
+        if(schoolRepository.findByRef(addSchoolForm.ref) != null) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
         val newSchool = School(
@@ -46,25 +49,28 @@ class SchoolService {
         return ResponseEntity(HttpStatus.CREATED)
     }
 
-    fun editSchool(editSchoolForm: EditSchoolForm, session: String): ResponseEntity<String> {
+    fun editSchool(
+            editSchoolForm: EditSchoolForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        if (!requester.isWebsiteAdmin) {
+        if(!requester.isWebsiteAdmin) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
         val school = schoolRepository.findByIdOrNull(editSchoolForm.id)?:
                 return ResponseEntity(HttpStatus.NOT_FOUND)
 
-        if (schoolRepository.findByName(editSchoolForm.name) != null) {
+        if(schoolRepository.findByName(editSchoolForm.name) != null) {
             if(schoolRepository.findByName(editSchoolForm.name)!!.id != school.id) {
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
             }
         }
 
-        if (schoolRepository.findByRef(editSchoolForm.ref) != null) {
-            if (schoolRepository.findByRef(editSchoolForm.ref)!!.id != school.id) {
+        if(schoolRepository.findByRef(editSchoolForm.ref) != null) {
+            if(schoolRepository.findByRef(editSchoolForm.ref)!!.id != school.id) {
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
             }
         }
@@ -75,11 +81,14 @@ class SchoolService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun deleteSchool(schoolId: Long, session: String): ResponseEntity<String> {
+    fun deleteSchool(
+            schoolId: Long,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        if (!requester.isWebsiteAdmin) {
+        if(!requester.isWebsiteAdmin) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -87,7 +96,7 @@ class SchoolService {
                 return ResponseEntity(HttpStatus.NOT_FOUND)
 
         val orgsInSchool = organizationRepository.findAllBySchool(schoolToDelete)
-        if (orgsInSchool.isNotEmpty()) {
+        if(orgsInSchool.isNotEmpty()) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -95,14 +104,17 @@ class SchoolService {
         return ResponseEntity(HttpStatus.ACCEPTED)
     }
 
-    fun joinSchool(ref: String, session: String): ResponseEntity<String> {
+    fun joinSchool(
+            ref: String,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val school = schoolRepository.findByRef(ref)?:
                 return ResponseEntity(HttpStatus.NOT_FOUND)
 
-        if (requester.school != null && requester.organizations.isNotEmpty()) {
+        if(requester.school != null && requester.organizations.isNotEmpty()) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -112,11 +124,13 @@ class SchoolService {
 
     }
 
-    fun getAllSchools(session: String): ResponseEntity<List<School>> {
+    fun getAllSchools(
+            session: String
+    ): ResponseEntity<List<School>> {
         val requester = userRepository.findBySessions_Key(session)?:
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        if (!requester.isWebsiteAdmin) {
+        if(!requester.isWebsiteAdmin) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -124,14 +138,17 @@ class SchoolService {
         return ResponseEntity(schools, HttpStatus.OK)
     }
 
-    fun getOrgsBySchool(schoolId: Long, session: String): ResponseEntity<List<Organization>> {
+    fun getOrgsBySchool(
+            schoolId: Long,
+            session: String
+    ): ResponseEntity<List<Organization>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val school: School = schoolRepository.findByIdOrNull(schoolId)?:
                 return ResponseEntity(HttpStatus.NOT_FOUND)
 
-        if (requester.school != school) {
+        if(requester.school != school) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
         return ResponseEntity(organizationRepository.findAllBySchool(school), HttpStatus.OK)

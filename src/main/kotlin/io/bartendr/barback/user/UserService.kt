@@ -26,24 +26,26 @@ class UserService {
 
     var bCryptPasswordEncoder = BCryptPasswordEncoder()
 
-    fun register(regForm: RegForm): ResponseEntity<String> {
-        if (userRepository.findByEmailAddress(regForm.emailAddress.toLowerCase()) != null) {
+    fun register(
+            regForm: RegForm
+    ): ResponseEntity<String> {
+        if(userRepository.findByEmailAddress(regForm.emailAddress.toLowerCase()) != null) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (regForm.firstName == "") {
+        if(regForm.firstName == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (regForm.lastName == "") {
+        if(regForm.lastName == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (regForm.emailAddress == "" || !regForm.emailAddress.contains("@")) {
+        if(regForm.emailAddress == "" || !regForm.emailAddress.contains("@")) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (regForm.plainTextPassword == "" || regForm.plainTextPassword.length < 8) {
+        if(regForm.plainTextPassword == "" || regForm.plainTextPassword.length < 8) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -55,7 +57,7 @@ class UserService {
                 dateOfBirth = regForm.dateOfBirth
         )
 
-        if (userRepository.findAll().isEmpty()) {
+        if(userRepository.findAll().isEmpty()) {
             newUser.isWebsiteAdmin = true
         }
 
@@ -71,17 +73,19 @@ class UserService {
         return ResponseEntity(HttpStatus.CREATED)
     }
 
-    fun login(loginForm: LoginForm): ResponseEntity<String> {
+    fun login(
+            loginForm: LoginForm
+    ): ResponseEntity<String> {
         val requester: User = userRepository.findByEmailAddress(loginForm.emailAddress.toLowerCase())?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.emailVerified) {
+        if(!requester.emailVerified) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        return if (bCryptPasswordEncoder.matches(loginForm.plainTextPassword, requester.hashedPassword)) {
+        return if(bCryptPasswordEncoder.matches(loginForm.plainTextPassword, requester.hashedPassword)) {
             val session = Session()
-            if (requester.sessions.size > 2) {
+            if(requester.sessions.size > 2) {
                 val sessionToDelete: Session = requester.sessions[0]
                 requester.sessions.remove(sessionToDelete)
                 sessionRepository.delete(sessionToDelete)
@@ -96,12 +100,14 @@ class UserService {
         }
     }
 
-    fun logout(session: String): ResponseEntity<String> {
+    fun logout(
+            session: String
+    ): ResponseEntity<String> {
         val requester: User = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        for (possibleSession in requester.sessions) {
-            if (session == possibleSession.key) {
+        for(possibleSession in requester.sessions) {
+            if(session == possibleSession.key) {
                 requester.sessions.remove(possibleSession)
                 sessionRepository.delete(possibleSession)
                 userRepository.save(requester)
@@ -112,14 +118,18 @@ class UserService {
         return ResponseEntity(HttpStatus.NOT_FOUND)
     }
 
-    fun authCheck(session: String): ResponseEntity<User> {
+    fun authCheck(
+            session: String
+    ): ResponseEntity<User> {
         val requester: User = userRepository.findBySessions_Key(session)?:
-            return ResponseEntity(HttpStatus.NOT_FOUND)
+                return ResponseEntity(HttpStatus.NOT_FOUND)
 
         return ResponseEntity(requester, HttpStatus.OK)
     }
 
-    fun verifyEmail(token: String): ResponseEntity<String> {
+    fun verifyEmail(
+            token: String
+    ): ResponseEntity<String> {
         val requester: User = userRepository.findByEmailVerificationToken(token)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
         requester.emailVerified = true
@@ -127,7 +137,9 @@ class UserService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun forgotPassword(emailAddress: String): ResponseEntity<String> {
+    fun forgotPassword(
+            emailAddress: String
+    ): ResponseEntity<String> {
         val requester: User = userRepository.findByEmailAddress(emailAddress)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
         requester.forgottenPassword = true
@@ -144,7 +156,10 @@ class UserService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun resetPassword(token: String, newPassword: String): ResponseEntity<String> {
+    fun resetPassword(
+            token: String,
+            newPassword: String
+    ): ResponseEntity<String> {
         val requester: User = userRepository.findByForgottenPasswordToken(token)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
         requester.hashedPassword = bCryptPasswordEncoder.encode(newPassword)
@@ -157,20 +172,26 @@ class UserService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun getUser(userId: Long): ResponseEntity<User> {
+    fun getUser(
+            userId: Long
+    ): ResponseEntity<User> {
         val user: User = userRepository.findByIdOrNull(userId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
         return ResponseEntity(user, HttpStatus.OK)
     }
 
-    fun getSelf(session: String): ResponseEntity<User> {
+    fun getSelf(
+            session: String
+    ): ResponseEntity<User> {
         val requester: User = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
         return ResponseEntity(requester, HttpStatus.OK)
     }
 
-    fun getOwnOrganizations(session: String): ResponseEntity<List<Organization>> {
+    fun getOwnOrganizations(
+            session: String
+    ): ResponseEntity<List<Organization>> {
         val requester: User = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 

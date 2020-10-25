@@ -2,6 +2,7 @@ package io.bartendr.barback.organization
 
 import io.bartendr.barback.event.EventCategory
 import io.bartendr.barback.event.EventCategoryRepository
+import io.bartendr.barback.event.EventRepository
 import io.bartendr.barback.organization.form.*
 import io.bartendr.barback.role.Role
 import io.bartendr.barback.role.RoleRepository
@@ -35,32 +36,38 @@ class OrganizationService {
     @Autowired
     lateinit var eventCategoryRepository: EventCategoryRepository
 
+    @Autowired
+    lateinit var eventRepository: EventRepository
+
     val bCryptPasswordEncoder = BCryptPasswordEncoder()
 
-    fun addOrganization(addOrganizationForm: AddOrganizationForm, session: String): ResponseEntity<String> {
+    fun addOrganization(
+            addOrganizationForm: AddOrganizationForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val school = requester.school?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (organizationRepository.findByRef(addOrganizationForm.ref) != null) {
+        if(organizationRepository.findByRef(addOrganizationForm.ref) != null) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (organizationRepository.findByNameAndSchool(addOrganizationForm.name, school) != null) {
+        if(organizationRepository.findByNameAndSchool(addOrganizationForm.name, school) != null) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (addOrganizationForm.name == "") {
+        if(addOrganizationForm.name == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (addOrganizationForm.ref == "") {
+        if(addOrganizationForm.ref == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
-        if (addOrganizationForm.secret == "") {
+        if(addOrganizationForm.secret == "") {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -111,21 +118,24 @@ class OrganizationService {
 
     }
 
-    fun joinOrganization(joinOrganizationForm: JoinOrganizationForm, session: String): ResponseEntity<String> {
+    fun joinOrganization(
+            joinOrganizationForm: JoinOrganizationForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByRef(joinOrganizationForm.ref)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (organization.school != requester.school) {
+        if(organization.school != requester.school) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        return if (bCryptPasswordEncoder.matches(joinOrganizationForm.secret, organization.secret)) {
+        return if(bCryptPasswordEncoder.matches(joinOrganizationForm.secret, organization.secret)) {
             requester.organizations.add(organization)
 
-            if (organization.organizationSettings.requireUserApproval) {
+            if(organization.organizationSettings.requireUserApproval) {
                 val unapprovedRole = roleRepository.findByOrganizationAndPermissions(organization, "UNAPPROVED")
                 unapprovedRole.users.add(requester)
                 roleRepository.save(unapprovedRole)
@@ -147,13 +157,33 @@ class OrganizationService {
             val eventCategories: List<EventCategory> = eventCategoryRepository.findAllByOrganization(organization)
 
             for(category in eventCategories) {
-                barDetails.flags.add(Flag(
-                        category = category,
-                        completed = false
-                ))
+                if(category.requiredFor.size == 0 && !category.requiredForAll) {
+                    barDetails.flags.add(Flag(
+                            category = category,
+                            completed = false
+                    ))
+                }
+                if(category.requiredForAll) {
+                    val events = eventRepository.findAllByCategory(category)
+                    for(event in events) {
+                        barDetails.score -= category.penalty
+                    }
+                }
+                if(category.requiredFor.contains(roleRepository.findByOrganizationAndPermissions(organization, "DEFAULT"))) {
+                    val events = eventRepository.findAllByCategory(category)
+                    for (event in events) {
+                        barDetails.score -= category.penalty
+                    }
+                }
             }
 
             barDetailsRepository.save(barDetails)
+            
+            val closedEvents = eventRepository.findAllByOrganizationAndClosed(organization, true)
+            for(event in closedEvents) {
+                event.notAttended.add(requester)
+                eventRepository.save(event)
+            }
 
             ResponseEntity(HttpStatus.OK)
         }
@@ -162,7 +192,11 @@ class OrganizationService {
         }
     }
 
-    fun approveUser(organizationId: Long, userId: Long, session: String): ResponseEntity<String> {
+    fun approveUser(
+            organizationId: Long,
+            userId: Long,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -172,7 +206,7 @@ class OrganizationService {
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -182,7 +216,7 @@ class OrganizationService {
         val unapprovedUserRole = roleRepository.findByOrganizationAndUsers(organization, unapprovedUser)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!unapprovedUserRole.permissions.contains("UNAPPROVED")) {
+        if(!unapprovedUserRole.permissions.contains("UNAPPROVED")) {
             return ResponseEntity(HttpStatus.BAD_REQUEST)
         }
 
@@ -198,38 +232,44 @@ class OrganizationService {
         return ResponseEntity(HttpStatus.OK)
     }
 
-    fun getOrganization(organizationId: Long, session: String): ResponseEntity<Organization> {
+    fun getOrganization(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<Organization> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
         return ResponseEntity(organization, HttpStatus.OK)
     }
 
-    fun getOrgUsers(organizationId: Long, session: String): ResponseEntity<MutableList<User>> {
+    fun getOrgUsers(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<MutableList<User>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
-        val users = userRepository.findAllByOrganizationsContaining(organization).toMutableList()
+        val users = userRepository.findAllByOrganizations(organization).toMutableList()
         val unapprovedUsers: MutableList<User> = mutableListOf()
 
-        for (user in users) {
+        for(user in users) {
             val role = roleRepository.findByOrganizationAndUsers(organization, user)?:
                     continue
-            if (role.permissions.contains("UNAPPROVED")) {
+            if(role.permissions.contains("UNAPPROVED")) {
                 unapprovedUsers.add(user)
             }
         }
@@ -239,7 +279,10 @@ class OrganizationService {
         return ResponseEntity(users, HttpStatus.OK)
     }
 
-    fun getUnapprovedUsers(organizationId: Long, session: String): ResponseEntity<MutableList<User>> {
+    fun getUnapprovedUsers(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<MutableList<User>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -249,7 +292,7 @@ class OrganizationService {
         val requesterRole = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
+        if(!requesterRole.permissions.contains("SUPERADMIN") && !requesterRole.permissions.contains("canManageUsers")) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -258,22 +301,25 @@ class OrganizationService {
         return ResponseEntity(unapprovedRole.users, HttpStatus.OK)
     }
     
-    fun getOrgBarDetails(organizationId: Long, session: String): ResponseEntity<List<BarDetails>> {
+    fun getOrgBarDetails(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<BarDetails>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
         val barDetailsList = barDetailsRepository.findAllByOrganization(organization)
         var barDetailsToRemove = mutableListOf<BarDetails>()
 
-        for (barDetails in barDetailsList) {
-            if (roleRepository.findByOrganizationAndUsers(organization, barDetails.user)!!.permissions.contains("UNAPPROVED")) {
+        for(barDetails in barDetailsList) {
+            if(roleRepository.findByOrganizationAndUsers(organization, barDetails.user)!!.permissions.contains("UNAPPROVED")) {
                         barDetailsToRemove.add(barDetails)
                     }
         }
@@ -283,14 +329,17 @@ class OrganizationService {
         return ResponseEntity(barDetailsList, HttpStatus.OK)
     }
 
-    fun getEventCategories(organizationId: Long, session: String): ResponseEntity<List<EventCategory>> {
+    fun getEventCategories(
+            organizationId: Long,
+            session: String
+    ): ResponseEntity<List<EventCategory>> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
         val organization = organizationRepository.findByIdOrNull(organizationId)?:
                 return ResponseEntity(HttpStatus.BAD_REQUEST)
 
-        if (!requester.organizations.contains(organization)) {
+        if(!requester.organizations.contains(organization)) {
             return ResponseEntity(HttpStatus.UNAUTHORIZED)
         }
 
@@ -299,7 +348,11 @@ class OrganizationService {
         return ResponseEntity(eventCategories, HttpStatus.OK)
     }
 
-    fun addEventCategory(organizationId: Long, addCategoryForm: AddCategoryForm, session: String): ResponseEntity<String> {
+    fun addEventCategory(
+            organizationId: Long,
+            addCategoryForm: AddCategoryForm,
+            session: String
+    ): ResponseEntity<String> {
         val requester = userRepository.findBySessions_Key(session)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
@@ -309,24 +362,27 @@ class OrganizationService {
         val role = roleRepository.findByOrganizationAndUsers(organization, requester)?:
                 return ResponseEntity(HttpStatus.UNAUTHORIZED)
 
-        return if (role.permissions.contains("SUPERADMIN") || role.permissions.contains("canAddEventCategories")) {
+        return if(role.permissions.contains("SUPERADMIN") || role.permissions.contains("canAddEventCategories")) {
             val requiredRoles: MutableList<Role> = roleRepository.findAllById(addCategoryForm.requiredRoleIds)
 
             val eventCategory = EventCategory(
                     name = addCategoryForm.name,
                     penalty = addCategoryForm.penalty,
+                    requiredForAll = addCategoryForm.requiredForAll,
                     requiredFor = requiredRoles,
                     organization = organization
             )
 
             eventCategoryRepository.save(eventCategory)
 
-            for (user in userRepository.findAllByOrganizationsContaining(organization)) {
+            for(user in userRepository.findAllByOrganizations(organization)) {
                 val barDetails = barDetailsRepository.findByUserAndOrganization(user, organization)
-                barDetails.flags.add(Flag(
-                        category = eventCategory,
-                        completed = false
-                ))
+                if(eventCategory.requiredFor.size == 0 && !eventCategory.requiredForAll) {
+                    barDetails.flags.add(Flag(
+                            category = eventCategory,
+                            completed = false
+                    ))
+                }
                 barDetailsRepository.save(barDetails)
             }
 
