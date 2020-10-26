@@ -263,7 +263,7 @@ class EventService {
                     }
                 }
             }
-            if(event.category.requiredFor.size > 0 && !event.category.requiredForAll) {
+            if(event.category.requiredFor.size == 0 && !event.category.requiredForAll) {
                 for (flag in barDetails.flags) {
                     if (flag.category == event.category) {
                         flag.completed = true
@@ -286,7 +286,7 @@ class EventService {
                     }
                 }
             }
-            if(event.category.requiredFor.size > 0 && !event.category.requiredForAll) {
+            if(event.category.requiredFor.size == 0 && !event.category.requiredForAll) {
                 for (flag in barDetails.flags) {
                     if (flag.category == event.category) {
                         if (eventRepository.findAllByCategoryAndAttended(event.category, user).size < 2) {
