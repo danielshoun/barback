@@ -4,6 +4,7 @@ import io.bartendr.barback.organization.OrganizationRepository
 import io.bartendr.barback.poll.form.CreatePollForm
 import io.bartendr.barback.role.RoleRepository
 import io.bartendr.barback.user.UserRepository
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
@@ -104,10 +105,15 @@ class PollService {
         }
 
         val voteHash = UUID.randomUUID().toString()
-        choice.hashes.add(voteHash)
-        pollChoiceRepository.save(choice)
-        poll.usersVotedIn.add(requester)
-        pollRepository.save(poll)
+        try {
+            choice.hashes.add(voteHash)
+            pollChoiceRepository.save(choice)
+            poll.usersVotedIn.add(requester)
+            pollRepository.save(poll)
+        } catch (e: ConstraintViolationException) {
+            print("Attempted to add duplicate hash $voteHash")
+        }
+
 
         return ResponseEntity(voteHash, HttpStatus.OK)
     }
